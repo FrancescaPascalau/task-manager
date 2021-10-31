@@ -19,4 +19,10 @@ public class TaskManager {
     public int getCapacity() {
         return capacity;
     }
+
+    public void listAll() {
+        for (Process process : this.queue) {
+            System.out.println(process);
+        }
+    }
 }

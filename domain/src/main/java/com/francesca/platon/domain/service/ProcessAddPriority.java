@@ -11,7 +11,7 @@ public class ProcessAddPriority implements ProcessAddStrategy {
     public void addProcess(ArrayBlockingQueue<Process> queue, Process process) {
         if (queue.remainingCapacity() == 0) {
             System.out.println("Queue is full \nEvaluating process priority...\n");
-            checkProcessPriority(queue, process, process.getPriority());
+            handleProcessByPriority(queue, process, process.getPriority());
         }
 
         if (queue.remainingCapacity() != 0) {
@@ -20,28 +20,35 @@ public class ProcessAddPriority implements ProcessAddStrategy {
         }
     }
 
-    private void checkProcessPriority(ArrayBlockingQueue<Process> queue,
-                                      Process process,
-                                      Priority priority) {
+    private void handleProcessByPriority(ArrayBlockingQueue<Process> queue,
+                                         Process process,
+                                         Priority priority) {
         switch (priority) {
             case LOW -> process.skip();
-            case MEDIUM -> getOldestProcessByPriority(queue, Priority.LOW);
+            case MEDIUM -> getOlderProcessByPriority(queue, Priority.LOW);
             case HIGH -> queue.stream()
                     .filter(it -> it.getPriority().equals(Priority.LOW))
                     .findFirst()
-                    .ifPresentOrElse(oldestProcess ->
-                            queue.removeIf(it -> it.getPid() == oldestProcess.getPid()),
-                            () -> getOldestProcessByPriority(queue, Priority.MEDIUM)
+                    .ifPresentOrElse(olderProcess -> {
+                        var removed = queue.removeIf(it -> it.getPid() == olderProcess.getPid());
+                        isProcessRemoved(olderProcess, removed);
+                        }, () -> getOlderProcessByPriority(queue, Priority.MEDIUM)
                     );
         }
     }
 
-    private void getOldestProcessByPriority(ArrayBlockingQueue<Process> queue, Priority priority) {
+    private void getOlderProcessByPriority(ArrayBlockingQueue<Process> queue, Priority priority) {
         queue.stream()
                 .filter(it -> it.getPriority().equals(priority))
                 .findFirst()
-                .ifPresent(lowPriorityProcess ->
-                        queue.removeIf(it -> it.getPid() == lowPriorityProcess.getPid())
-                );
+                .ifPresent(process -> {
+                        var removed = queue.removeIf(it -> it.getPid() == process.getPid());
+                        isProcessRemoved(process, removed);
+                });
+    }
+
+    private void isProcessRemoved(Process process, boolean removed) {
+        if (removed)
+            System.out.println("Process with lower priority removed (PID = " + process.getPid() + ")");
     }
 }

@@ -22,24 +22,45 @@ public class TaskManagerApp {
                 "Enter option: ");
         int option = scanner.nextInt();
 
-        if (option == 1) {
-            System.out.print("Select add process approach: \n" +
-                    "1. FIFO;\n" +
-                    "2. PRIORITY;\n" +
-                    "3. DEFAULT;\n");
-            int addStrategy = scanner.nextInt();
+        switch (option) {
+            case 1 -> {
+                System.out.print("Select add process approach: \n" +
+                        "1. FIFO;\n" +
+                        "2. PRIORITY;\n" +
+                        "3. DEFAULT;\n");
+                int addStrategy = scanner.nextInt();
 
-            var process1 = ProcessService.createProcess(Priority.LOW);
-            service.addProcess(process1, addStrategy);
+                var process1 = ProcessService.createProcess(Priority.HIGH);
+                service.addProcess(process1, addStrategy);
 
-            var process2 = ProcessService.createProcess(Priority.MEDIUM);
-            service.addProcess(process2, addStrategy);
+                var process2 = ProcessService.createProcess(Priority.MEDIUM);
+                service.addProcess(process2, addStrategy);
 
-            var process3 = ProcessService.createProcess(Priority.MEDIUM);
-            service.addProcess(process3, addStrategy);
+                var process3 = ProcessService.createProcess(Priority.MEDIUM);
+                service.addProcess(process3, addStrategy);
 
-            var process4 = ProcessService.createProcess(Priority.HIGH);
-            service.addProcess(process4, addStrategy);
+                var process4 = ProcessService.createProcess(Priority.HIGH);
+                service.addProcess(process4, addStrategy);
+            }
+            case 2 -> {
+                var process1 = ProcessService.createProcess(Priority.HIGH);
+                service.addProcess(process1, 1);
+
+                var process2 = ProcessService.createProcess(Priority.MEDIUM);
+                service.addProcess(process2, 1);
+
+                var process3 = ProcessService.createProcess(Priority.MEDIUM);
+                service.addProcess(process3, 1);
+
+                var process4 = ProcessService.createProcess(Priority.HIGH);
+                service.addProcess(process4, 1);
+
+                taskManager.listAll();
+            }
+            case 3 -> {
+                //TODO - Implement kill() functionality
+            }
+            default -> System.out.println("Try again");
         }
     }
 }
