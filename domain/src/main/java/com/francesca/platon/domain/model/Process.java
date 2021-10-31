@@ -21,16 +21,16 @@ public class Process {
         System.out.println("Process " + this.pid + " is running...");
     }
 
-    public void remove(){
+    public void remove() {
         System.out.println("Process " + this.pid + " could not be started. Removing it from the poll.");
     }
 
-    public void skip(){
+    public void skip() {
         System.out.println("Skipping process " + this.pid + "\n");
     }
 
-    public void kill(){
-        System.out.println("Process " + this.pid + " stopped.");
+    public void kill(Integer pid) {
+        System.out.println("\nProcess " + pid + " stopped\n");
     }
 
     public int getPid() {

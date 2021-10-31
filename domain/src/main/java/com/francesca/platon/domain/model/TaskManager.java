@@ -1,6 +1,10 @@
 package com.francesca.platon.domain.model;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.stream.Collectors;
 
 public class TaskManager {
 
@@ -20,9 +24,27 @@ public class TaskManager {
         return capacity;
     }
 
-    public void listAll() {
-        for (Process process : this.queue) {
-            System.out.println(process);
-        }
+    public List<Process> getProcesses() {
+        return getProcessesList();
+    }
+
+    public List<Process> getProcessesByPriority() {
+        return getProcessesList()
+                .stream()
+                .sorted(Comparator.comparing(Process::getPriority))
+                .collect(Collectors.toList());
+    }
+
+    public List<Process> getProcessesByPid() {
+        return getProcessesList()
+                .stream()
+                .sorted(Comparator.comparing(Process::getPid))
+                .collect(Collectors.toList());
+    }
+
+    private List<Process> getProcessesList() {
+        return Arrays.stream(queue.toArray())
+                .map(Process.class::cast)
+                .collect(Collectors.toList());
     }
 }

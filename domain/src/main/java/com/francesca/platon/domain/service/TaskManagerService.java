@@ -23,6 +23,33 @@ public class TaskManagerService {
         }
     }
 
+    public void removeProcess(Process process) {
+        ArrayBlockingQueue<Process> queue = taskManager.getQueue();
+
+        try {
+            process.kill(process.getPid());
+            queue.removeIf(it -> it.getPid() == process.getPid());
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Running processes: " + queue);
+    }
+
+    public void removeAllProcesses() {
+        ArrayBlockingQueue<Process> queue = taskManager.getQueue();
+
+        for (Process process : queue)
+            process.kill(process.getPid());
+
+        try {
+            queue.clear();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Task Manager has no running processes at the moment: " + queue);
+    }
+
     private void add(Process process,
                      ArrayBlockingQueue<Process> queue,
                      int strategy) {
