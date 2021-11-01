@@ -19,20 +19,28 @@ public class TaskManagerApp {
         TaskManager taskManager = new TaskManager(3);
         TaskManagerService service = new TaskManagerService(taskManager);
 
+        int optionSelected;
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Available options: \n" +
-                "1. Add new process;\n" +
-                "2. List all running processes;\n" +
-                "3. Kill process/es;\n" +
-                "Enter option: ");
-        int option = scanner.nextInt();
+        do {
+            System.out.print("\nAvailable options: \n" +
+                    "1. Add new process;\n" +
+                    "2. List all running processes;\n" +
+                    "3. Kill process/es;\n" +
+                    "(Press 0 to exit)\n" +
+                    "Enter option: ");
+            optionSelected = scanner.nextInt();
 
-        switch (option) {
-            case 1 -> addNewProcess(service, scanner);
-            case 2 -> showProcesses(taskManager, service, scanner);
-            case 3 -> killProcesses(taskManager, service, scanner);
-            default -> System.out.println("Try again");
-        }
+            switch (optionSelected) {
+                case 1 -> addNewProcess(service, scanner);
+                case 2 -> showProcesses(taskManager, scanner);
+                case 3 -> killProcesses(taskManager, service, scanner);
+                case 0 -> {
+                    System.out.println("Closing Task Manager");
+                    taskManager.getQueue().clear();
+                }
+                default -> System.out.println("Not a valid option");
+            }
+        } while(optionSelected != 0);
     }
 
     private static void addNewProcess(TaskManagerService service, Scanner scanner) {
@@ -42,31 +50,23 @@ public class TaskManagerApp {
                 "3. DEFAULT;\n");
         int addStrategy = scanner.nextInt();
 
-        var process1 = ProcessService.createProcess(Priority.HIGH);
-        service.addProcess(process1, addStrategy);
+        System.out.print("Select process priority: \n" +
+                "1. LOW;\n" +
+                "2. MEDIUM;\n" +
+                "3. HIGH;\n");
+        int optionSelected = scanner.nextInt();
 
-        var process2 = ProcessService.createProcess(Priority.MEDIUM);
-        service.addProcess(process2, addStrategy);
-
-        var process3 = ProcessService.createProcess(Priority.MEDIUM);
-        service.addProcess(process3, addStrategy);
-
-        var process4 = ProcessService.createProcess(Priority.HIGH);
-        service.addProcess(process4, addStrategy);
+        Process process = null;
+        switch (optionSelected) {
+            case 1 -> process = ProcessService.createProcess(Priority.LOW);
+            case 2 -> process = ProcessService.createProcess(Priority.MEDIUM);
+            case 3 -> process = ProcessService.createProcess(Priority.HIGH);
+            default -> System.out.println("Not a valid option");
+        }
+        service.addProcess(process, addStrategy);
     }
 
-    private static void showProcesses(TaskManager taskManager,
-                                      TaskManagerService service,
-                                      Scanner scanner) {
-        var process1 = ProcessService.createProcess(Priority.HIGH);
-        service.addProcess(process1, 1);
-
-        var process2 = ProcessService.createProcess(Priority.MEDIUM);
-        service.addProcess(process2, 1);
-
-        var process3 = ProcessService.createProcess(Priority.LOW);
-        service.addProcess(process3, 1);
-
+    private static void showProcesses(TaskManager taskManager, Scanner scanner) {
         System.out.print("\nSelect list running processes filter: \n" +
                 "1. By time;\n" +
                 "2. By priority;\n" +
@@ -79,7 +79,6 @@ public class TaskManagerApp {
             case 3 -> runningProcesses = taskManager.getProcessesByPid();
             default -> runningProcesses = taskManager.getProcesses();
         }
-
         for (Process process : runningProcesses)
             System.out.println(process);
     }
@@ -87,15 +86,6 @@ public class TaskManagerApp {
     private static void killProcesses(TaskManager taskManager,
                                       TaskManagerService service,
                                       Scanner scanner) {
-        var process1 = ProcessService.createProcess(Priority.MEDIUM);
-        service.addProcess(process1, 1);
-
-        var process2 = ProcessService.createProcess(Priority.LOW);
-        service.addProcess(process2, 1);
-
-        var process3 = ProcessService.createProcess(Priority.LOW);
-        service.addProcess(process3, 1);
-
         System.out.print("\nSelect option: \n" +
                 "1. Kill one specific process;\n" +
                 "2. Kill all processes with specific priority;\n" +
