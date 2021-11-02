@@ -49,6 +49,7 @@ public class ProcessAddPriority implements ProcessAddStrategy {
 
     private void isProcessRemoved(Process process, boolean removed) {
         if (removed)
+            process.kill();
             System.out.println("Process with lower priority removed (PID = " + process.getPid() + ")");
     }
 }

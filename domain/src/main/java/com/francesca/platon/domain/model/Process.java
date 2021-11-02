@@ -29,8 +29,8 @@ public class Process {
         System.out.println("Skipping process " + this.pid + "\n");
     }
 
-    public void kill(Integer pid) {
-        System.out.println("\nProcess " + pid + " stopped\n");
+    public void kill() {
+        System.out.println("\nProcess " + getPid() + " stopped\n");
     }
 
     public int getPid() {

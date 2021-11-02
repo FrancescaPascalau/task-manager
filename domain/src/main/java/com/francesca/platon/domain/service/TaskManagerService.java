@@ -23,11 +23,21 @@ public class TaskManagerService {
         }
     }
 
+    private void add(Process process,
+                     ArrayBlockingQueue<Process> queue,
+                     int strategy) {
+        switch (strategy) {
+            case 1 -> new ProcessAddFifo().addProcess(queue, process);
+            case 2 -> new ProcessAddPriority().addProcess(queue, process);
+            default -> new ProcessAddDefault().addProcess(queue, process);
+        }
+    }
+
     public void removeProcess(Process process) {
         ArrayBlockingQueue<Process> queue = taskManager.getQueue();
 
         try {
-            process.kill(process.getPid());
+            process.kill();
             queue.removeIf(it -> it.getPid() == process.getPid());
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -40,7 +50,7 @@ public class TaskManagerService {
         ArrayBlockingQueue<Process> queue = taskManager.getQueue();
 
         for (Process process : queue)
-            process.kill(process.getPid());
+            process.kill();
 
         try {
             queue.clear();
@@ -48,16 +58,5 @@ public class TaskManagerService {
             e.printStackTrace();
         }
         System.out.println("Task Manager has no running processes at the moment: " + queue);
-    }
-
-    private void add(Process process,
-                     ArrayBlockingQueue<Process> queue,
-                     int strategy) {
-
-        switch (strategy) {
-            case 1 -> new ProcessAddFifo().addProcess(queue, process);
-            case 2 -> new ProcessAddPriority().addProcess(queue, process);
-            default -> new ProcessAddDefault().addProcess(queue, process);
-        }
     }
 }

@@ -12,9 +12,10 @@ public class ProcessAddFifo implements ProcessAddStrategy {
             System.out.println("Queue is full \nRemoving oldest process to make space for new ones...\n");
             var queueHead = queue.poll();
 
-            if (queueHead != null)
+            if (queueHead != null) {
+                queueHead.kill();
                 System.out.println("Process with PID = " + queueHead.getPid() + " is removed.");
-
+            }
         }
             queue.add(process);
             process.run();
