@@ -6,6 +6,7 @@ import com.francesca.platon.domain.model.Process;
 import com.francesca.platon.domain.model.TaskManager;
 import com.francesca.platon.domain.service.ProcessService;
 import com.francesca.platon.domain.service.TaskManagerService;
+import org.apache.commons.lang3.EnumUtils;
 
 import java.util.List;
 import java.util.Locale;
@@ -65,14 +66,18 @@ public class TaskManagerApp {
                 "3. HIGH;\n");
         int optionSelected = scanner.nextInt();
 
-        Process process = null;
-        switch (optionSelected) {
-            case 1 -> process = ProcessService.createProcess(Priority.LOW);
-            case 2 -> process = ProcessService.createProcess(Priority.MEDIUM);
-            case 3 -> process = ProcessService.createProcess(Priority.HIGH);
-            default -> System.out.println("Not a valid option");
+        if (addStrategy <= 0 || addStrategy > 3)
+            System.out.println("Not a valid option");
+        else {
+            Process process = null;
+            switch (optionSelected) {
+                case 1 -> process = ProcessService.createProcess(Priority.LOW);
+                case 2 -> process = ProcessService.createProcess(Priority.MEDIUM);
+                case 3 -> process = ProcessService.createProcess(Priority.HIGH);
+                default -> System.out.println("Not a valid option");
+            }
+            service.addProcess(process, addStrategy);
         }
-        service.addProcess(process, addStrategy);
     }
 
     public static void showProcesses(TaskManager taskManager, Scanner scanner) {
@@ -82,14 +87,23 @@ public class TaskManagerApp {
                 "3. By Pid;\n");
         int showStrategy = scanner.nextInt();
 
-        List<Process> runningProcesses;
-        switch (showStrategy) {
-            case 2 -> runningProcesses = taskManager.getProcessesByPriority();
-            case 3 -> runningProcesses = taskManager.getProcessesByPid();
-            default -> runningProcesses = taskManager.getProcesses();
+        if (showStrategy <= 0 || showStrategy > 3)
+            System.out.println("Not a valid option");
+        else {
+            List<Process> processes;
+            switch (showStrategy) {
+                case 2 -> processes = taskManager.getProcessesByPriority();
+                case 3 -> processes = taskManager.getProcessesByPid();
+                default -> processes = taskManager.getProcesses();
+            }
+
+            if (processes.isEmpty())
+                System.out.println("There are no running processes to show!");
+            else {
+                for (Process process : processes)
+                    System.out.println(process);
+            }
         }
-        for (Process process : runningProcesses)
-            System.out.println(process);
     }
 
     public static void killProcesses(TaskManager taskManager,
@@ -101,12 +115,20 @@ public class TaskManagerApp {
                 "3. Kill all running processes;\n");
         int killStrategy = scanner.nextInt();
 
-        var processes = taskManager.getProcesses();
-        switch (killStrategy) {
-            case 1 -> killProcessByPid(service, scanner, processes);
-            case 2 -> killProcessesByPriority(service, scanner, processes);
-            case 3 -> service.removeAllProcesses();
-            default -> System.out.println("Not a valid option");
+        if (killStrategy <= 0 || killStrategy > 3)
+            System.out.println("Not a valid option");
+        else {
+            var processes = taskManager.getProcesses();
+            if (processes.isEmpty())
+                System.out.println("There are no running processes to kill!");
+            else {
+                switch (killStrategy) {
+                    case 1 -> killProcessByPid(service, scanner, processes);
+                    case 2 -> killProcessesByPriority(service, scanner, processes);
+                    case 3 -> service.removeAllProcesses();
+                    default -> System.out.println("Not a valid option");
+                }
+            }
         }
     }
 
@@ -125,14 +147,21 @@ public class TaskManagerApp {
     private static void killProcessesByPriority(TaskManagerService service,
                                                 Scanner scanner,
                                                 List<Process> processes) {
-        System.out.println("\nIntroduce priority: \nPriority = ");
+        System.out.println("\nIntroduce priority: ");
         String priority = scanner.next().toUpperCase(Locale.ROOT);
 
-        var processesToKill = processes.stream()
-                .filter(it -> it.getPriority().name().equals(priority))
-                .collect(Collectors.toList());
+        if (EnumUtils.isValidEnum(Priority.class, priority)) {
+            var processesToKill = processes.stream()
+                    .filter(it -> it.getPriority().name().equals(priority))
+                    .collect(Collectors.toList());
 
-        for (Process process : processesToKill)
-            service.removeProcess(process);
+            if (processesToKill.isEmpty()) {
+                System.out.println("There are no running processes with " + priority + " priority");
+            } else {
+                for (Process process : processesToKill)
+                    service.removeProcess(process);
+            }
+        } else
+            System.out.println(priority + " is not a valid priority\n");
     }
 }
