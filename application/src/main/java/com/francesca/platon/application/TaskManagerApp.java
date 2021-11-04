@@ -43,13 +43,22 @@ public class TaskManagerApp {
         } while(optionSelected != 0);
     }
 
-    private static void addNewProcess(TaskManagerService service, Scanner scanner) {
+    public static void addNewProcess(TaskManagerService service, Scanner scanner) {
         System.out.print("Select add process approach: \n" +
                 "1. FIFO;\n" +
                 "2. PRIORITY;\n" +
                 "3. DEFAULT;\n");
         int addStrategy = scanner.nextInt();
 
+        if (addStrategy <= 0 || addStrategy > 3)
+            System.out.println("Not a valid option");
+        else
+            addProcess(service, scanner, addStrategy);
+    }
+
+    private static void addProcess(TaskManagerService service,
+                                   Scanner scanner,
+                                   int addStrategy) {
         System.out.print("Select process priority: \n" +
                 "1. LOW;\n" +
                 "2. MEDIUM;\n" +
@@ -66,7 +75,7 @@ public class TaskManagerApp {
         service.addProcess(process, addStrategy);
     }
 
-    private static void showProcesses(TaskManager taskManager, Scanner scanner) {
+    public static void showProcesses(TaskManager taskManager, Scanner scanner) {
         System.out.print("\nSelect list running processes filter: \n" +
                 "1. By time;\n" +
                 "2. By priority;\n" +
@@ -83,7 +92,7 @@ public class TaskManagerApp {
             System.out.println(process);
     }
 
-    private static void killProcesses(TaskManager taskManager,
+    public static void killProcesses(TaskManager taskManager,
                                       TaskManagerService service,
                                       Scanner scanner) {
         System.out.print("\nSelect option: \n" +
@@ -94,27 +103,36 @@ public class TaskManagerApp {
 
         var processes = taskManager.getProcesses();
         switch (killStrategy) {
-            case 1 -> {
-                System.out.println("\nIntroduce process PID: \nPID:");
-                int pid = scanner.nextInt();
-
-                processes.stream()
-                        .filter(it -> it.getPid() == pid)
-                        .findFirst()
-                        .ifPresentOrElse(service::removeProcess, ProcessNotFoundException::new);
-            }
-            case 2 -> {
-                System.out.println("\nIntroduce priority: \nPriority = ");
-                String priority = scanner.next().toUpperCase(Locale.ROOT);
-
-               var processesToKill = processes.stream()
-                        .filter(it -> it.getPriority().name().equals(priority))
-                        .collect(Collectors.toList());
-
-               for (Process process : processesToKill)
-                   service.removeProcess(process);
-            }
-            default -> service.removeAllProcesses();
+            case 1 -> killProcessByPid(service, scanner, processes);
+            case 2 -> killProcessesByPriority(service, scanner, processes);
+            case 3 -> service.removeAllProcesses();
+            default -> System.out.println("Not a valid option");
         }
+    }
+
+    private static void killProcessByPid(TaskManagerService service,
+                                         Scanner scanner,
+                                         List<Process> processes) {
+        System.out.println("\nIntroduce process PID: \nPID:");
+        int pid = scanner.nextInt();
+
+        processes.stream()
+                .filter(it -> it.getPid() == pid)
+                .findFirst()
+                .ifPresentOrElse(service::removeProcess, ProcessNotFoundException::new);
+    }
+
+    private static void killProcessesByPriority(TaskManagerService service,
+                                                Scanner scanner,
+                                                List<Process> processes) {
+        System.out.println("\nIntroduce priority: \nPriority = ");
+        String priority = scanner.next().toUpperCase(Locale.ROOT);
+
+        var processesToKill = processes.stream()
+                .filter(it -> it.getPriority().name().equals(priority))
+                .collect(Collectors.toList());
+
+        for (Process process : processesToKill)
+            service.removeProcess(process);
     }
 }
